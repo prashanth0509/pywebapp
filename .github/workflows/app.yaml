@@ -1,7 +1,31 @@
-- name: Test app with retry
-  run: |
-    for i in {1..5}; do
-      curl http://localhost:5000 && break
-      echo "Retrying..."
-      sleep 3
-    done
+name: Run Web App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  run-app:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build Docker Image
+        run: docker build -t myapp .
+
+      - name: Run Container
+        run: docker run -d -p 5000:5000 myapp
+
+      - name: Wait for app
+        run: sleep 5
+
+      - name: Test app
+        run: |
+          for i in {1..5}; do
+            curl http://localhost:5000 && break
+            echo "Retrying..."
+            sleep 3
+          done
